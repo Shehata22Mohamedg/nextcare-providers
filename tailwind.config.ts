@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        body: ['DM Sans', 'sans-serif'],
+        heading: ['DM Sans', 'sans-serif'],
+        'body-ar': ['Cairo', 'sans-serif'],
+        'heading-ar': ['Cairo', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
