@@ -6,7 +6,7 @@ import FiltersPanel, { Filters } from "@/components/FiltersPanel";
 import DataTable from "@/components/DataTable";
 import ProviderDetails from "@/components/ProviderDetails";
 import { ProviderRaw } from "@/lib/excelParser";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const emptyFilters: Filters = {
   governate: [],
