@@ -6,7 +6,7 @@ import FiltersPanel, { Filters } from "@/components/FiltersPanel";
 import DataTable from "@/components/DataTable";
 import ProviderDetails from "@/components/ProviderDetails";
 import { ProviderRaw } from "@/lib/excelParser";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 
 const emptyFilters: Filters = {
   governate: [],
@@ -32,13 +32,20 @@ export default function Index() {
     const q = searchQuery.toLowerCase();
 
     return providers.filter((p) => {
-      // Search
+      // Free text search across all relevant fields
       if (q) {
         const fields = [
           en ? p.providerNameEN : p.providerNameAR,
           en ? p.specialtyEN : p.specialtyAR,
           en ? p.cityEN : p.cityAR,
           en ? p.servicesEN : p.servicesAR,
+          en ? p.governateEN : p.governateAR,
+          en ? p.addressEN : p.addressAR,
+          en ? p.providerTypeEN : p.providerTypeAR,
+          p.phone,
+          p.email,
+          p.networkType,
+          p.status,
         ];
         if (!fields.some((f) => f.toLowerCase().includes(q))) return false;
       }
@@ -72,6 +79,22 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+
+      {/* Prominent search bar below header */}
+      <div className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute top-1/2 -translate-y-1/2 start-4 h-5 w-5 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("search")}
+              className="w-full rounded-xl border-2 border-border bg-background py-3 ps-12 pe-4 text-base focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/20 transition-colors placeholder:text-muted-foreground"
+            />
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 py-6 flex-1 flex gap-6 items-start">
         <div className="w-72 shrink-0 hidden lg:block sticky top-6">
