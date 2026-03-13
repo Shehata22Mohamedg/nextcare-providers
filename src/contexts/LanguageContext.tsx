@@ -39,6 +39,7 @@ const translations: Record<string, Record<Language, string>> = {
   next: { en: "Next", ar: "التالي" },
   page: { en: "Page", ar: "صفحة" },
   rowsPerPage: { en: "Rows per page", ar: "صفوف في الصفحة" },
+  columns: { en: "Columns", ar: "الأعمدة" },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
