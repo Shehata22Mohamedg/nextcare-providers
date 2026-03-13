@@ -1,6 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ProviderRaw } from "@/lib/excelParser";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +33,13 @@ function MultiSelect({
   onChange: (val: string[]) => void;
 }) {
   const { t } = useLanguage();
+  const [search, setSearch] = useState("");
+
+  const filteredOptions = useMemo(() => {
+    if (!search) return options;
+    const q = search.toLowerCase();
+    return options.filter((opt) => opt.toLowerCase().includes(q));
+  }, [options, search]);
 
   return (
     <div className="space-y-1.5">
@@ -42,31 +49,42 @@ function MultiSelect({
           <span className="ms-1 text-primary">({selected.length})</span>
         )}
       </label>
-      <div className="max-h-36 overflow-y-auto rounded-md border border-border bg-card p-1.5 space-y-0.5">
-        {options.length === 0 ? (
-          <p className="text-xs text-muted-foreground p-1">{t("noResults")}</p>
-        ) : (
-          options.map((opt) => (
-            <label
-              key={opt}
-              className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-secondary cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={selected.includes(opt)}
-                onChange={() => {
-                  onChange(
-                    selected.includes(opt)
-                      ? selected.filter((s) => s !== opt)
-                      : [...selected, opt]
-                  );
-                }}
-                className="rounded border-border text-primary focus:ring-ring"
-              />
-              <span className="truncate">{opt || "—"}</span>
-            </label>
-          ))
-        )}
+      <div className="rounded-md border border-border bg-card overflow-hidden">
+        <div className="px-1.5 pt-1.5">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("search")}
+            className="w-full rounded border border-border bg-background px-2 py-1 text-xs focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+          />
+        </div>
+        <div className="max-h-36 overflow-y-auto p-1.5 space-y-0.5">
+          {filteredOptions.length === 0 ? (
+            <p className="text-xs text-muted-foreground p-1">{t("noResults")}</p>
+          ) : (
+            filteredOptions.map((opt) => (
+              <label
+                key={opt}
+                className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-secondary cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.includes(opt)}
+                  onChange={() => {
+                    onChange(
+                      selected.includes(opt)
+                        ? selected.filter((s) => s !== opt)
+                        : [...selected, opt]
+                    );
+                  }}
+                  className="rounded border-border text-primary focus:ring-ring"
+                />
+                <span className="truncate">{opt || "—"}</span>
+              </label>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
