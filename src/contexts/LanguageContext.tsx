@@ -41,6 +41,8 @@ const translations: Record<string, Record<Language, string>> = {
   rowsPerPage: { en: "Rows per page", ar: "صفوف في الصفحة" },
   columns: { en: "Columns", ar: "الأعمدة" },
   viewDetails: { en: "View Details", ar: "عرض التفاصيل" },
+  copied: { en: "Phone number copied!", ar: "!تم نسخ رقم الهاتف" },
+  copyPhone: { en: "Copy", ar: "نسخ" },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
