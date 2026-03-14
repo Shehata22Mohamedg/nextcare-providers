@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { ProviderRaw } from "@/lib/excelParser";
 import { Phone, MapPin, Stethoscope, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PhoneNumbers from "@/components/PhoneNumbers";
 
 interface ProviderCardProps {
   provider: ProviderRaw;
@@ -38,9 +39,9 @@ export default function ProviderCard({ provider, onSelect }: ProviderCardProps) 
       )}
 
       {provider.phone && (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span className="truncate" dir="ltr">{provider.phone}</span>
+        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <Phone className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+          <PhoneNumbers phone={provider.phone} compact />
         </div>
       )}
 
