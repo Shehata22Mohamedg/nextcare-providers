@@ -11,13 +11,13 @@ export default function AppHeader({ searchQuery, onSearchChange }: AppHeaderProp
   const { language, toggleLanguage, t } = useLanguage();
 
   return (
-    <header className="bg-primary text-primary-foreground shadow-lg">
-      <div className="container mx-auto px-4 py-4 flex items-center gap-4 flex-wrap">
-        <h1 className="text-xl font-bold tracking-tight whitespace-nowrap">
+    <header className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-40">
+      <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-4 flex items-center gap-2 sm:gap-4">
+        <h1 className="text-base sm:text-xl font-bold tracking-tight whitespace-nowrap">
           {t("appTitle")}
         </h1>
 
-        <div className="flex-1 min-w-[200px] max-w-xl relative">
+        <div className="flex-1 min-w-0 max-w-xl relative">
           <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-primary-foreground/60" />
           <input
             type="text"
@@ -32,10 +32,11 @@ export default function AppHeader({ searchQuery, onSearchChange }: AppHeaderProp
           variant="outline"
           size="sm"
           onClick={toggleLanguage}
-          className="border-primary-foreground/30 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 hover:text-primary-foreground gap-2"
+          className="border-primary-foreground/30 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 hover:text-primary-foreground gap-1 sm:gap-2 text-xs sm:text-sm shrink-0"
         >
           <Globe className="h-4 w-4" />
-          {language === "en" ? "العربية" : "English"}
+          <span className="hidden sm:inline">{language === "en" ? "العربية" : "English"}</span>
+          <span className="sm:hidden">{language === "en" ? "ع" : "EN"}</span>
         </Button>
       </div>
     </header>

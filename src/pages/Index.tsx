@@ -1,69 +1,65 @@
 import { useState, useMemo } from "react";
 import { useProviders } from "@/hooks/useProviders";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useIsMobile } from "@/hooks/use-mobile";
 import AppHeader from "@/components/AppHeader";
 import FiltersPanel, { Filters } from "@/components/FiltersPanel";
 import DataTable from "@/components/DataTable";
+import ProviderCard from "@/components/ProviderCard";
 import ProviderDetails from "@/components/ProviderDetails";
+import MobileFilterDrawer from "@/components/MobileFilterDrawer";
 import { ProviderRaw } from "@/lib/excelParser";
-import { Loader2 } from "lucide-react";
+import { Loader2, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const emptyFilters: Filters = {
-  governate: [],
-  city: [],
-  specialty: [],
-  providerType: [],
-  networkType: [],
-  status: [],
-  mainBranch: [],
-  services: [],
+  governate: [], city: [], specialty: [], providerType: [],
+  networkType: [], status: [], mainBranch: [], services: [],
 };
 
 export default function Index() {
   const { data: providers, isLoading } = useProviders();
   const { language, t } = useLanguage();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [selectedProvider, setSelectedProvider] = useState<ProviderRaw | null>(null);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  const searchIndex = useSearchIndex(providers);
 
   const filtered = useMemo(() => {
     if (!providers) return [];
     const en = language === "en";
-    const q = searchQuery.toLowerCase();
+    const q = debouncedQuery.toLowerCase();
 
-    return providers.filter((p) => {
-      // Free text search across all relevant fields
-      if (q) {
-        const fields = [
-          en ? p.providerNameEN : p.providerNameAR,
-          en ? p.specialtyEN : p.specialtyAR,
-          en ? p.cityEN : p.cityAR,
-          en ? p.servicesEN : p.servicesAR,
-          en ? p.governateEN : p.governateAR,
-          en ? p.addressEN : p.addressAR,
-          en ? p.providerTypeEN : p.providerTypeAR,
-          p.phone,
-          p.email,
-          p.networkType,
-          p.status,
-        ];
-        if (!fields.some((f) => f.toLowerCase().includes(q))) return false;
-      }
+    return searchIndex
+      .filter((entry) => {
+        // Free text search via pre-indexed text
+        if (q && !(en ? entry.textEN : entry.textAR).includes(q)) return false;
 
-      // Filters
-      const check = (sel: string[], val: string) => sel.length === 0 || sel.includes(val);
-      if (!check(filters.governate, en ? p.governateEN : p.governateAR)) return false;
-      if (!check(filters.city, en ? p.cityEN : p.cityAR)) return false;
-      if (!check(filters.specialty, en ? p.specialtyEN : p.specialtyAR)) return false;
-      if (!check(filters.services, en ? p.servicesEN : p.servicesAR)) return false;
-      if (!check(filters.providerType, en ? p.providerTypeEN : p.providerTypeAR)) return false;
-      if (!check(filters.networkType, p.networkType)) return false;
-      if (!check(filters.status, p.status)) return false;
-      if (!check(filters.mainBranch, p.mainBranch)) return false;
+        const p = entry.provider;
+        const check = (sel: string[], val: string) => sel.length === 0 || sel.includes(val);
+        if (!check(filters.governate, en ? p.governateEN : p.governateAR)) return false;
+        if (!check(filters.city, en ? p.cityEN : p.cityAR)) return false;
+        if (!check(filters.specialty, en ? p.specialtyEN : p.specialtyAR)) return false;
+        if (!check(filters.services, en ? p.servicesEN : p.servicesAR)) return false;
+        if (!check(filters.providerType, en ? p.providerTypeEN : p.providerTypeAR)) return false;
+        if (!check(filters.networkType, p.networkType)) return false;
+        if (!check(filters.status, p.status)) return false;
+        if (!check(filters.mainBranch, p.mainBranch)) return false;
+        return true;
+      })
+      .map((e) => e.provider);
+  }, [providers, searchIndex, debouncedQuery, filters, language]);
 
-      return true;
-    });
-  }, [providers, searchQuery, filters, language]);
+  const activeFilterCount = useMemo(
+    () => Object.values(filters).reduce((sum, f) => sum + f.length, 0),
+    [filters]
+  );
 
   if (isLoading) {
     return (
@@ -80,9 +76,9 @@ export default function Index() {
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-
-      <div className="container mx-auto px-4 py-6 flex-1 flex gap-6 items-start">
-        <div className="w-72 shrink-0 hidden lg:block sticky top-6">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 flex-1 flex gap-6 items-start">
+        {/* Desktop sidebar filters */}
+        <div className="w-72 shrink-0 hidden lg:block sticky top-[72px]">
           <FiltersPanel
             providers={providers || []}
             filters={filters}
@@ -90,13 +86,66 @@ export default function Index() {
           />
         </div>
 
-        <div className="flex-1 min-w-0 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {filtered.length} {t("providers")}
-          </p>
-          <DataTable providers={filtered} onSelectProvider={setSelectedProvider} />
+        {/* Main content */}
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {filtered.length} {t("providers")}
+            </p>
+
+            {/* Mobile filter button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="lg:hidden gap-2 text-xs"
+              onClick={() => setFilterDrawerOpen(true)}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              {t("filters")}
+              {activeFilterCount > 0 && (
+                <span className="bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 text-[10px] leading-none font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          {/* Mobile: card layout, Desktop: table */}
+          {isMobile ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filtered.length === 0 ? (
+                <p className="col-span-full text-center py-12 text-muted-foreground">
+                  {t("noResults")}
+                </p>
+              ) : (
+                filtered.slice(0, 50).map((provider, idx) => (
+                  <ProviderCard
+                    key={idx}
+                    provider={provider}
+                    onSelect={setSelectedProvider}
+                  />
+                ))
+              )}
+              {filtered.length > 50 && (
+                <p className="col-span-full text-center text-sm text-muted-foreground py-4">
+                  {t("showing")} 50 {t("of")} {filtered.length} {t("providers")}
+                </p>
+              )}
+            </div>
+          ) : (
+            <DataTable providers={filtered} onSelectProvider={setSelectedProvider} />
+          )}
         </div>
       </div>
+
+      {/* Mobile filter drawer */}
+      <MobileFilterDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        providers={providers || []}
+        filters={filters}
+        onFilterChange={setFilters}
+      />
 
       {selectedProvider && (
         <ProviderDetails provider={selectedProvider} onClose={() => setSelectedProvider(null)} />
