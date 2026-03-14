@@ -46,7 +46,7 @@ const translations: Record<string, Record<Language, string>> = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("ar");
 
   const toggleLanguage = useCallback(() => {
     setLanguage((prev) => (prev === "en" ? "ar" : "en"));
