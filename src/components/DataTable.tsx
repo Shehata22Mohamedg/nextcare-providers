@@ -1,6 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ProviderRaw } from "@/lib/excelParser";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Columns3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface DataTableProps {
   providers: ProviderRaw[];
@@ -34,15 +35,16 @@ const ALL_COLUMNS = [
 
 const DEFAULT_VISIBLE = ["providerName", "specialty", "providerType", "city", "governate", "phone"];
 
+const ROW_HEIGHT = 44;
+
 export default function DataTable({ providers, onSelectProvider }: DataTableProps) {
   const { language, t } = useLanguage();
   const [sortKey, setSortKey] = useState<string>("providerName");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [visibleKeys, setVisibleKeys] = useState<string[]>(DEFAULT_VISIBLE);
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  const getField = (p: ProviderRaw, key: string): string => {
+  const getField = useCallback((p: ProviderRaw, key: string): string => {
     const en = language === "en";
     const map: Record<string, string> = {
       providerName: en ? p.providerNameEN : p.providerNameAR,
@@ -59,7 +61,7 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
       email: p.email,
     };
     return map[key] || "";
-  };
+  }, [language]);
 
   const sorted = useMemo(() => {
     return [...providers].sort((a, b) => {
@@ -67,11 +69,14 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
       const vb = getField(b, sortKey).toLowerCase();
       return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [providers, sortKey, sortDir, language]);
+  }, [providers, sortKey, sortDir, getField]);
 
-  const totalPages = Math.ceil(sorted.length / rowsPerPage);
-  const paginated = sorted.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  const virtualizer = useVirtualizer({
+    count: sorted.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 20,
+  });
 
   const handleSort = (key: string) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -79,7 +84,6 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
       setSortKey(key);
       setSortDir("asc");
     }
-    setPage(0);
   };
 
   const columns = ALL_COLUMNS.filter((c) => visibleKeys.includes(c.key));
@@ -99,18 +103,18 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
     );
   };
 
-  const PrevIcon = language === "ar" ? ChevronRight : ChevronLeft;
-  const NextIcon = language === "ar" ? ChevronLeft : ChevronRight;
-
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       {/* Column chooser toolbar */}
-      <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-secondary/30">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-secondary/30">
+        <span className="text-sm text-muted-foreground">
+          {sorted.length} {t("providers")}
+        </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2 text-xs">
               <Columns3 className="h-3.5 w-3.5" />
-              {t("columns") || "Columns"}
+              {t("columns")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -127,9 +131,10 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
         </DropdownMenu>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Virtualized scrollable area */}
+      <div ref={parentRef} className="overflow-auto max-h-[70vh]">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="bg-secondary">
               {columns.map((col) => (
                 <th
@@ -143,75 +148,51 @@ export default function DataTable({ providers, onSelectProvider }: DataTableProp
             </tr>
           </thead>
           <tbody>
-            {paginated.length === 0 ? (
+            {sorted.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="text-center py-12 text-muted-foreground">
                   {t("noResults")}
                 </td>
               </tr>
             ) : (
-              paginated.map((provider, idx) => (
-                <tr
-                  key={idx}
-                  onClick={() => onSelectProvider(provider)}
-                  className="border-t border-border hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 max-w-[250px] truncate">
-                      {getField(provider, col.key)}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              <>
+                {virtualizer.getVirtualItems().length > 0 && (
+                  <tr style={{ height: virtualizer.getVirtualItems()[0].start }}>
+                    <td colSpan={columns.length} />
+                  </tr>
+                )}
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const provider = sorted[virtualRow.index];
+                  return (
+                    <tr
+                      key={virtualRow.index}
+                      onClick={() => onSelectProvider(provider)}
+                      className="border-t border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                      style={{ height: ROW_HEIGHT }}
+                    >
+                      {columns.map((col) => (
+                        <td key={col.key} className="px-4 py-2 max-w-[250px] truncate">
+                          {getField(provider, col.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+                {virtualizer.getVirtualItems().length > 0 && (
+                  <tr
+                    style={{
+                      height:
+                        virtualizer.getTotalSize() -
+                        (virtualizer.getVirtualItems().at(-1)?.end ?? 0),
+                    }}
+                  >
+                    <td colSpan={columns.length} />
+                  </tr>
+                )}
+              </>
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-secondary/50 flex-wrap gap-2">
-        <span className="text-sm text-muted-foreground">
-          {t("showing")} {sorted.length > 0 ? page * rowsPerPage + 1 : 0}–{Math.min((page + 1) * rowsPerPage, sorted.length)} {t("of")} {sorted.length} {t("providers")}
-        </span>
-
-        <div className="flex items-center gap-2">
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setPage(0);
-            }}
-            className="text-sm border border-border rounded-md bg-card px-2 py-1"
-          >
-            {[10, 25, 50, 100].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            <PrevIcon className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground min-w-[60px] text-center">
-            {page + 1} / {totalPages || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            <NextIcon className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
   );
