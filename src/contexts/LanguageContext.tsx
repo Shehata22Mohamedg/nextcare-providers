@@ -43,6 +43,7 @@ const translations: Record<string, Record<Language, string>> = {
   viewDetails: { en: "View Details", ar: "عرض التفاصيل" },
   copied: { en: "Phone number copied!", ar: "!تم نسخ رقم الهاتف" },
   copyPhone: { en: "Copy", ar: "نسخ" },
+  applyFilters: { en: "Apply Filters", ar: "تطبيق الفلاتر" },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

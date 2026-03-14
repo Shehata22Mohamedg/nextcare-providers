@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ProviderRaw } from "@/lib/excelParser";
-import { useMemo, useState } from "react";
-import { Filter, X } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Filter, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Filters {
@@ -20,6 +20,11 @@ interface FiltersProps {
   filters: Filters;
   onFilterChange: (filters: Filters) => void;
 }
+
+const emptyFilters: Filters = {
+  governate: [], city: [], specialty: [], providerType: [],
+  networkType: [], status: [], mainBranch: [], services: [],
+};
 
 function MultiSelect({
   label,
@@ -92,11 +97,6 @@ function MultiSelect({
 
 export type { Filters };
 
-/**
- * Compute available options for each filter based on currently selected values
- * of ALL OTHER filters (cascading). This way, selecting a governate narrows
- * city/specialty/etc. options to only those that exist within that governate.
- */
 function useCascadingOptions(providers: ProviderRaw[], filters: Filters, language: "en" | "ar") {
   return useMemo(() => {
     const en = language === "en";
@@ -114,7 +114,6 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
       }
     };
 
-    // For each filter key, compute available options by applying all OTHER filters
     const filterKeys: (keyof Filters)[] = [
       "governate", "city", "specialty", "services",
       "providerType", "networkType", "status", "mainBranch",
@@ -123,7 +122,6 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
     const result: Record<keyof Filters, string[]> = {} as any;
 
     for (const targetKey of filterKeys) {
-      // Filter providers by all filters EXCEPT the targetKey
       const filtered = providers.filter((p) => {
         for (const otherKey of filterKeys) {
           if (otherKey === targetKey) continue;
@@ -133,7 +131,6 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
         return true;
       });
 
-      // Collect unique values for targetKey from these filtered providers
       const unique = [...new Set(filtered.map((p) => getVal(p, targetKey)).filter(Boolean))].sort();
       result[targetKey] = unique;
     }
@@ -145,24 +142,30 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
 export default function FiltersPanel({ providers, filters, onFilterChange }: FiltersProps) {
   const { language, t } = useLanguage();
 
-  const options = useCascadingOptions(providers, filters, language);
+  // Draft state: accumulate selections locally, apply on button click
+  const [draft, setDraft] = useState<Filters>(filters);
 
+  // Sync draft when external filters change (e.g. clear from parent)
+  useEffect(() => {
+    setDraft(filters);
+  }, [filters]);
+
+  // Cascading options use the DRAFT so users see narrowed options as they pick
+  const options = useCascadingOptions(providers, draft, language);
+
+  const hasDraftChanges = JSON.stringify(draft) !== JSON.stringify(filters);
   const hasActiveFilters = Object.values(filters).some((f) => f.length > 0);
+  const hasDraftSelections = Object.values(draft).some((f) => f.length > 0);
 
-  const clearAll = () =>
-    onFilterChange({
-      governate: [],
-      city: [],
-      specialty: [],
-      providerType: [],
-      networkType: [],
-      status: [],
-      mainBranch: [],
-      services: [],
-    });
+  const applyFilters = () => onFilterChange(draft);
 
-  const update = (key: keyof Filters) => (val: string[]) =>
-    onFilterChange({ ...filters, [key]: val });
+  const clearAll = () => {
+    setDraft(emptyFilters);
+    onFilterChange(emptyFilters);
+  };
+
+  const updateDraft = (key: keyof Filters) => (val: string[]) =>
+    setDraft({ ...draft, [key]: val });
 
   return (
     <aside className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
@@ -171,7 +174,7 @@ export default function FiltersPanel({ providers, filters, onFilterChange }: Fil
           <Filter className="h-4 w-4 text-primary" />
           {t("filters")}
         </h2>
-        {hasActiveFilters && (
+        {(hasActiveFilters || hasDraftSelections) && (
           <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive hover:text-destructive gap-1 h-7 text-xs">
             <X className="h-3 w-3" />
             {t("clearFilters")}
@@ -179,14 +182,37 @@ export default function FiltersPanel({ providers, filters, onFilterChange }: Fil
         )}
       </div>
 
-      <MultiSelect label={t("governate")} options={options.governate} selected={filters.governate} onChange={update("governate")} />
-      <MultiSelect label={t("city")} options={options.city} selected={filters.city} onChange={update("city")} />
-      <MultiSelect label={t("specialty")} options={options.specialty} selected={filters.specialty} onChange={update("specialty")} />
-      <MultiSelect label={t("services")} options={options.services} selected={filters.services} onChange={update("services")} />
-      <MultiSelect label={t("providerType")} options={options.providerType} selected={filters.providerType} onChange={update("providerType")} />
-      <MultiSelect label={t("networkType")} options={options.networkType} selected={filters.networkType} onChange={update("networkType")} />
-      <MultiSelect label={t("mainBranch")} options={options.mainBranch} selected={filters.mainBranch} onChange={update("mainBranch")} />
-      <MultiSelect label={t("status")} options={options.status} selected={filters.status} onChange={update("status")} />
+      <MultiSelect label={t("governate")} options={options.governate} selected={draft.governate} onChange={updateDraft("governate")} />
+      <MultiSelect label={t("city")} options={options.city} selected={draft.city} onChange={updateDraft("city")} />
+      <MultiSelect label={t("specialty")} options={options.specialty} selected={draft.specialty} onChange={updateDraft("specialty")} />
+      <MultiSelect label={t("services")} options={options.services} selected={draft.services} onChange={updateDraft("services")} />
+      <MultiSelect label={t("providerType")} options={options.providerType} selected={draft.providerType} onChange={updateDraft("providerType")} />
+      <MultiSelect label={t("networkType")} options={options.networkType} selected={draft.networkType} onChange={updateDraft("networkType")} />
+      <MultiSelect label={t("mainBranch")} options={options.mainBranch} selected={draft.mainBranch} onChange={updateDraft("mainBranch")} />
+      <MultiSelect label={t("status")} options={options.status} selected={draft.status} onChange={updateDraft("status")} />
+
+      {/* Apply / Clear buttons */}
+      <div className="flex gap-2 pt-2 sticky bottom-0 bg-card pb-1">
+        <Button
+          onClick={applyFilters}
+          disabled={!hasDraftChanges}
+          size="sm"
+          className="flex-1 gap-1.5"
+        >
+          <Check className="h-3.5 w-3.5" />
+          {t("applyFilters")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearAll}
+          disabled={!hasDraftSelections && !hasActiveFilters}
+          className="gap-1.5"
+        >
+          <X className="h-3.5 w-3.5" />
+          {t("clearFilters")}
+        </Button>
+      </div>
     </aside>
   );
 }
