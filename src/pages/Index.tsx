@@ -58,6 +58,9 @@ export default function Index() {
       .map((e) => e.provider);
   }, [providers, searchIndex, debouncedQuery, filters, language]);
 
+  // Reset mobile page when results change
+  useMemo(() => { setMobilePage(1); }, [filtered.length]);
+
   const activeFilterCount = useMemo(
     () => Object.values(filters).reduce((sum, f) => sum + f.length, 0),
     [filters]
