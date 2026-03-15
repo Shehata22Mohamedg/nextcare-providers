@@ -28,6 +28,8 @@ export default function Index() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [selectedProvider, setSelectedProvider] = useState<ProviderRaw | null>(null);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
+  const MOBILE_PAGE_SIZE = 30;
 
   const searchIndex = useSearchIndex(providers);
 
