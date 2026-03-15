@@ -42,8 +42,10 @@ export async function loadProviders(): Promise<ProviderRaw[]> {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<any>(sheet);
 
+  const s = (v: unknown): string => (v == null ? "" : String(v).trim());
+
   return rows.map((row: any) => ({
-    providerNameEN: row["TATSH Names"] || "",
+    providerNameEN: s(row["TATSH Names"]),
     providerNameAR: row["مقدم الخدمة"] || "",
     specialtyEN: row["Specialty"] || "",
     specialtyAR: row["التخصص"] || "",
