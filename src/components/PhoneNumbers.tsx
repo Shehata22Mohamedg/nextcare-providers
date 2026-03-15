@@ -32,7 +32,7 @@ export default function PhoneNumbers({ phone, compact }: PhoneNumbersProps) {
   return (
     <div className={compact ? "space-y-1" : "space-y-1.5"}>
       {numbers.map((num, idx) => (
-        <div key={idx} className="flex items-center gap-1.5 group">
+        <div key={idx} className="flex items-center gap-1.5">
           <span className={`font-mono ${compact ? "text-xs" : "text-sm"} text-foreground`} dir="ltr">
             {num}
           </span>
@@ -41,17 +41,17 @@ export default function PhoneNumbers({ phone, compact }: PhoneNumbersProps) {
               e.stopPropagation();
               copy(num, idx);
             }}
-            className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-0.5 rounded hover:bg-muted"
+            className="p-1 rounded hover:bg-muted transition-colors"
             title={t("copyPhone")}
           >
             {copiedIdx === idx ? (
-              <Check className="h-3 w-3 text-green-600" />
+              <Check className="h-3.5 w-3.5 text-accent" />
             ) : (
-              <Copy className="h-3 w-3 text-muted-foreground" />
+              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
             )}
           </button>
           {copiedIdx === idx && (
-            <span className="text-[10px] text-green-600 animate-in fade-in">{t("copied")}</span>
+            <span className="text-[10px] text-accent animate-in fade-in">{t("copied")}</span>
           )}
         </div>
       ))}

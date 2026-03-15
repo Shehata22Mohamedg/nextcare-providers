@@ -28,18 +28,26 @@ export default function MobileFilterDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="max-h-[85vh]" onPointerDownOutside={(e) => e.preventDefault()}>
         <DrawerHeader className="pb-2">
           <DrawerTitle>{t("filters")}</DrawerTitle>
           <DrawerDescription className="sr-only">
             {t("filters")}
           </DrawerDescription>
         </DrawerHeader>
-        <div className="overflow-y-auto px-4 pb-6">
+        <div
+          className="overflow-y-auto px-4 pb-6"
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           <FiltersPanel
             providers={providers}
             filters={filters}
-            onFilterChange={onFilterChange}
+            onFilterChange={(f) => {
+              onFilterChange(f);
+              onOpenChange(false);
+            }}
           />
         </div>
       </DrawerContent>

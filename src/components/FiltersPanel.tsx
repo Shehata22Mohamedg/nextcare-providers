@@ -39,6 +39,7 @@ function MultiSelect({
 }) {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const filteredOptions = useMemo(() => {
     if (!search) return options;
@@ -48,49 +49,63 @@ function MultiSelect({
 
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        {label}
-        {selected.length > 0 && (
-          <span className="ms-1 text-primary">({selected.length})</span>
-        )}
-      </label>
-      <div className="rounded-md border border-border bg-card overflow-hidden">
-        <div className="px-1.5 pt-1.5">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("search")}
-            className="w-full rounded border border-border bg-background px-2 py-1 text-xs focus:outline-none focus:border-primary placeholder:text-muted-foreground"
-          />
-        </div>
-        <div className="max-h-36 overflow-y-auto p-1.5 space-y-0.5">
-          {filteredOptions.length === 0 ? (
-            <p className="text-xs text-muted-foreground p-1">{t("noResults")}</p>
-          ) : (
-            filteredOptions.map((opt) => (
-              <label
-                key={opt}
-                className="flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-secondary cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(opt)}
-                  onChange={() => {
-                    onChange(
-                      selected.includes(opt)
-                        ? selected.filter((s) => s !== opt)
-                        : [...selected, opt]
-                    );
-                  }}
-                  className="rounded border-border text-primary focus:ring-ring"
-                />
-                <span className="truncate">{opt || "—"}</span>
-              </label>
-            ))
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wide py-1"
+      >
+        <span>
+          {label}
+          {selected.length > 0 && (
+            <span className="ms-1 text-primary normal-case">({selected.length})</span>
           )}
+        </span>
+        <svg
+          className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {expanded && (
+        <div className="rounded-md border border-border bg-card overflow-hidden">
+          <div className="px-1.5 pt-1.5">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("search")}
+              className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="max-h-36 overflow-y-auto p-1.5 space-y-0.5">
+            {filteredOptions.length === 0 ? (
+              <p className="text-xs text-muted-foreground p-1">{t("noResults")}</p>
+            ) : (
+              filteredOptions.map((opt) => (
+                <label
+                  key={opt}
+                  className="flex items-center gap-2 text-sm px-2 py-1.5 rounded hover:bg-secondary cursor-pointer select-none active:bg-secondary/80"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(opt)}
+                    onChange={() => {
+                      onChange(
+                        selected.includes(opt)
+                          ? selected.filter((s) => s !== opt)
+                          : [...selected, opt]
+                      );
+                    }}
+                    className="rounded border-border text-primary focus:ring-ring h-4 w-4"
+                  />
+                  <span className="truncate">{opt || "—"}</span>
+                </label>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -142,15 +157,12 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
 export default function FiltersPanel({ providers, filters, onFilterChange }: FiltersProps) {
   const { language, t } = useLanguage();
 
-  // Draft state: accumulate selections locally, apply on button click
   const [draft, setDraft] = useState<Filters>(filters);
 
-  // Sync draft when external filters change (e.g. clear from parent)
   useEffect(() => {
     setDraft(filters);
   }, [filters]);
 
-  // Cascading options use the DRAFT so users see narrowed options as they pick
   const options = useCascadingOptions(providers, draft, language);
 
   const hasDraftChanges = JSON.stringify(draft) !== JSON.stringify(filters);
@@ -168,7 +180,7 @@ export default function FiltersPanel({ providers, filters, onFilterChange }: Fil
     setDraft({ ...draft, [key]: val });
 
   return (
-    <aside className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
+    <aside className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold flex items-center gap-2 text-foreground">
           <Filter className="h-4 w-4 text-primary" />
