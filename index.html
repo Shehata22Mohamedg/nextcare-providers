@@ -1,33 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
     <title>Nextcare Search</title>
     <meta name="description" content="Search and explore medical provider directory with bilingual Arabic and English support.">
     <meta name="author" content="Lovable" />
-    
-    
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/cdAg2uY9lHbUMB61FE7Kfi6OGi83/social-images/social-1773433704888-NextCareUrgentCare-Scottsdale_20171109175251_logo.webp">
-
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/cdAg2uY9lHbUMB61FE7Kfi6OGi83/social-images/social-1773433704888-NextCareUrgentCare-Scottsdale_20171109175251_logo.webp">
-    
-  
-  
-  
-  <meta property="og:title" content="Nextcare Search">
-  <meta name="twitter:title" content="Nextcare Search">
-  <meta property="og:description" content="Search and explore medical provider directory with bilingual Arabic and English support.">
-  <meta name="twitter:description" content="Search and explore medical provider directory with bilingual Arabic and English support.">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-</head>
-
+    <meta property="og:title" content="Nextcare Search">
+    <meta name="twitter:title" content="Nextcare Search">
+    <meta property="og:description" content="Search and explore medical provider directory with bilingual Arabic and English support.">
+    <meta name="twitter:description" content="Search and explore medical provider directory with bilingual Arabic and English support.">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+      /* Instant loading screen before React hydrates */
+      #app-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: hsl(210 20% 98%);
+        font-family: 'Cairo', sans-serif;
+      }
+      #app-loader .spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid hsl(215 90% 42% / 0.2);
+        border-top-color: hsl(215 90% 42%);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      #app-loader p {
+        margin-top: 12px;
+        color: hsl(215 15% 50%);
+        font-size: 14px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-loader">
+        <div class="spinner"></div>
+        <p>جاري تحميل البيانات...</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

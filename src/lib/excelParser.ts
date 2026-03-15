@@ -1,5 +1,3 @@
-import * as XLSX from "xlsx";
-
 export interface ProviderRaw {
   providerNameEN: string;
   providerNameAR: string;
@@ -22,8 +20,23 @@ export interface ProviderRaw {
   status: string;
 }
 
+// Lazy-load xlsx to avoid blocking initial render (~800KB)
+let xlsxModule: typeof import("xlsx") | null = null;
+
+async function getXLSX() {
+  if (!xlsxModule) {
+    xlsxModule = await import("xlsx");
+  }
+  return xlsxModule;
+}
+
 export async function loadProviders(): Promise<ProviderRaw[]> {
-  const response = await fetch("/data/providers.xlsx");
+  // Start both fetches in parallel
+  const [response, XLSX] = await Promise.all([
+    fetch("/data/providers.xlsx"),
+    getXLSX(),
+  ]);
+  
   const buffer = await response.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
