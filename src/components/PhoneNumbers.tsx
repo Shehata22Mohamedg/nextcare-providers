@@ -7,9 +7,11 @@ interface PhoneNumbersProps {
   compact?: boolean;
 }
 
-function splitPhones(raw: string): string[] {
-  if (!raw) return [];
-  return raw
+function splitPhones(raw: unknown): string[] {
+  if (raw == null) return [];
+  const str = String(raw);
+  if (!str.trim()) return [];
+  return str
     .split(/[\/\-]/)
     .map((n) => n.trim())
     .filter(Boolean);

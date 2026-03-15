@@ -42,25 +42,27 @@ export async function loadProviders(): Promise<ProviderRaw[]> {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<any>(sheet);
 
+  const s = (v: unknown): string => (v == null ? "" : String(v).trim());
+
   return rows.map((row: any) => ({
-    providerNameEN: row["TATSH Names"] || "",
-    providerNameAR: row["مقدم الخدمة"] || "",
-    specialtyEN: row["Specialty"] || "",
-    specialtyAR: row["التخصص"] || "",
-    servicesEN: row["Services provided"] || "",
-    servicesAR: row["الخدمات المقدمة"] || "",
-    addressEN: row["Address"] || "",
-    addressAR: row["العنوان"] || "",
-    cityEN: row["Area / City"] || "",
-    cityAR: row["المنطقة / المدينة"] || "",
-    governateEN: row["Governate"] || "",
-    governateAR: row["المحافظة"] || "",
-    phone: row["Tel. no. - التليفون"] || "",
-    email: row["E-MAIL - البريدالإلكتروني"] || "",
-    providerTypeEN: row["Provider Type"] || "",
-    providerTypeAR: row["نوع مقدم الخدمة"] || "",
-    networkType: row["Network Type"] || "",
-    mainBranch: row["Main/Branch"] || "",
-    status: row["PULSE Status"] || "",
+    providerNameEN: s(row["TATSH Names"]),
+    providerNameAR: s(row["مقدم الخدمة"]),
+    specialtyEN: s(row["Specialty"]),
+    specialtyAR: s(row["التخصص"]),
+    servicesEN: s(row["Services provided"]),
+    servicesAR: s(row["الخدمات المقدمة"]),
+    addressEN: s(row["Address"]),
+    addressAR: s(row["العنوان"]),
+    cityEN: s(row["Area / City"]),
+    cityAR: s(row["المنطقة / المدينة"]),
+    governateEN: s(row["Governate"]),
+    governateAR: s(row["المحافظة"]),
+    phone: s(row["Tel. no. - التليفون"]),
+    email: s(row["E-MAIL - البريدالإلكتروني"]),
+    providerTypeEN: s(row["Provider Type"]),
+    providerTypeAR: s(row["نوع مقدم الخدمة"]),
+    networkType: s(row["Network Type"]),
+    mainBranch: s(row["Main/Branch"]),
+    status: s(row["PULSE Status"]),
   }));
 }
