@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useProviders } from "@/hooks/useProviders";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
