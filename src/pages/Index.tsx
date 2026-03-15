@@ -112,26 +112,54 @@ export default function Index() {
             </Button>
           </div>
 
-          {/* Mobile: card layout, Desktop: table */}
+          {/* Mobile: card layout with pagination, Desktop: table */}
           {isMobile ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-3">
               {filtered.length === 0 ? (
-                <p className="col-span-full text-center py-12 text-muted-foreground">
+                <p className="text-center py-12 text-muted-foreground">
                   {t("noResults")}
                 </p>
               ) : (
-                filtered.slice(0, 50).map((provider, idx) => (
-                  <ProviderCard
-                    key={idx}
-                    provider={provider}
-                    onSelect={setSelectedProvider}
-                  />
-                ))
-              )}
-              {filtered.length > 50 && (
-                <p className="col-span-full text-center text-sm text-muted-foreground py-4">
-                  {t("showing")} 50 {t("of")} {filtered.length} {t("providers")}
-                </p>
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {filtered.slice((mobilePage - 1) * MOBILE_PAGE_SIZE, mobilePage * MOBILE_PAGE_SIZE).map((provider, idx) => (
+                      <ProviderCard
+                        key={idx}
+                        provider={provider}
+                        onSelect={setSelectedProvider}
+                      />
+                    ))}
+                  </div>
+                  {/* Pagination */}
+                  {filtered.length > MOBILE_PAGE_SIZE && (() => {
+                    const totalPages = Math.ceil(filtered.length / MOBILE_PAGE_SIZE);
+                    return (
+                      <div className="flex items-center justify-center gap-2 py-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mobilePage <= 1}
+                          onClick={() => { setMobilePage((p) => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          className="text-xs"
+                        >
+                          {t("previous")}
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          {t("page")} {mobilePage} / {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mobilePage >= totalPages}
+                          onClick={() => { setMobilePage((p) => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          className="text-xs"
+                        >
+                          {t("next")}
+                        </Button>
+                      </div>
+                    );
+                  })()}
+                </>
               )}
             </div>
           ) : (
