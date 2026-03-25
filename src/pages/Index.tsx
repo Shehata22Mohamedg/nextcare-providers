@@ -6,9 +6,10 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AppHeader from "@/components/AppHeader";
 import FiltersPanel, { Filters } from "@/components/FiltersPanel";
-import DataTable from "@/components/DataTable";
+import React, { Suspense } from "react";
+const DataTable = React.lazy(() => import("@/components/DataTable"));
+const ProviderDetails = React.lazy(() => import("@/components/ProviderDetails"));
 import ProviderCard from "@/components/ProviderCard";
-import ProviderDetails from "@/components/ProviderDetails";
 import MobileFilterDrawer from "@/components/MobileFilterDrawer";
 import AppFooter from "@/components/AppFooter";
 import { ProviderRaw } from "@/lib/excelParser";
@@ -79,10 +80,11 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-20">
+      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 z-50 bg-primary text-primary-foreground rounded px-3 py-1">Skip to main content</a>
       <AppHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 flex-1 flex gap-6 items-start">
+      <div id="main-content" aria-label="Main content" tabIndex={-1} className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 flex-1 flex gap-6 items-start">
         {/* Desktop sidebar filters */}
         <div className="w-72 shrink-0 hidden lg:block sticky top-[72px]">
           <FiltersPanel
@@ -163,7 +165,9 @@ export default function Index() {
               )}
             </div>
           ) : (
-            <DataTable providers={filtered} onSelectProvider={setSelectedProvider} />
+            <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <DataTable providers={filtered} onSelectProvider={setSelectedProvider} />
+            </Suspense>
           )}
         </div>
       </div>
@@ -179,9 +183,11 @@ export default function Index() {
         onFilterChange={setFilters}
       />
 
-      {selectedProvider && (
-        <ProviderDetails provider={selectedProvider} onClose={() => setSelectedProvider(null)} />
-      )}
+      <Suspense fallback={null}>
+        {selectedProvider && (
+          <ProviderDetails provider={selectedProvider} onClose={() => setSelectedProvider(null)} />
+        )}
+      </Suspense>
     </div>
   );
 }
