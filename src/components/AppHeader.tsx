@@ -1,14 +1,27 @@
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
 interface AppHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
+import React from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Search, Globe, Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 
 export default function AppHeader({ searchQuery, onSearchChange }: AppHeaderProps) {
   const { language, toggleLanguage, t } = useLanguage();
+  const [dark, setDark] = React.useState(() =>
+    typeof window !== "undefined" ? document.documentElement.classList.contains("dark") : false
+  );
+
+  const toggleDark = () => {
+    setDark((d) => {
+      const next = !d;
+      if (next) document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
+      return next;
+    });
+  };
 
   return (
     <header className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-40">
@@ -25,9 +38,19 @@ export default function AppHeader({ searchQuery, onSearchChange }: AppHeaderProp
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t("search")}
-              className="w-full rounded-lg bg-primary-foreground/15 backdrop-blur-sm border border-primary-foreground/20 py-1.5 ps-9 pe-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30"
+              className="w-full rounded-lg bg-primary-foreground/15 border border-primary-foreground/20 py-1.5 ps-9 pe-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30"
             />
           </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={toggleDark}
+            className="shrink-0"
+          >
+            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
 
           <Button
             variant="outline"
