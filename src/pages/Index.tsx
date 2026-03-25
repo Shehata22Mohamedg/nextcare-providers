@@ -172,6 +172,8 @@ export default function Index() {
         </div>
       </div>
 
+      <AppFooter />
+
       {/* Mobile filter drawer */}
       <MobileFilterDrawer
         open={filterDrawerOpen}
