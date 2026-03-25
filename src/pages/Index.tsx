@@ -10,6 +10,7 @@ import DataTable from "@/components/DataTable";
 import ProviderCard from "@/components/ProviderCard";
 import ProviderDetails from "@/components/ProviderDetails";
 import MobileFilterDrawer from "@/components/MobileFilterDrawer";
+import AppFooter from "@/components/AppFooter";
 import { ProviderRaw } from "@/lib/excelParser";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -170,6 +171,8 @@ export default function Index() {
           )}
         </div>
       </div>
+
+      <AppFooter />
 
       {/* Mobile filter drawer */}
       <MobileFilterDrawer
