@@ -42,7 +42,10 @@ export default function AppHeader({ searchQuery, onSearchChange }: AppHeaderProp
         </div>
 
         <p className="text-[10px] text-primary-foreground/40 text-center">
-          Developed by Shehata Mekawy
+          Developed by{" "}
+          <a href="https://shehata-mekawy-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-foreground/60">
+            Shehata Mekawy
+          </a>
         </p>
       </div>
     </header>
