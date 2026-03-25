@@ -6,53 +6,53 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 220 25% 10%;
+    --background: 0 0% 97%;
+    --foreground: 220 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 220 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 220 20% 12%;
 
-    --primary: 215 90% 42%;
+    --primary: 170 50% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 94%;
-    --secondary-foreground: 220 25% 15%;
+    --secondary: 170 15% 93%;
+    --secondary-foreground: 170 30% 15%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 170 10% 95%;
+    --muted-foreground: 170 10% 45%;
 
-    --accent: 165 60% 40%;
+    --accent: 36 80% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 215 90% 42%;
+    --border: 170 12% 88%;
+    --input: 170 12% 88%;
+    --ring: 170 50% 25%;
 
     --radius: 0.625rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 170 50% 20%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 170 10% 95%;
+    --sidebar-accent-foreground: 170 30% 15%;
+    --sidebar-border: 170 10% 90%;
+    --sidebar-ring: 170 50% 35%;
 
     --font-body: 'DM Sans', sans-serif;
     --font-heading: 'DM Sans', sans-serif;
     --font-body-ar: 'Cairo', sans-serif;
     --font-heading-ar: 'Cairo', sans-serif;
 
-    --header-gradient: linear-gradient(135deg, hsl(215 90% 42%), hsl(215 80% 30%));
-    --shadow-card: 0 1px 3px 0 hsl(220 25% 10% / 0.06), 0 1px 2px -1px hsl(220 25% 10% / 0.06);
-    --shadow-elevated: 0 10px 25px -5px hsl(220 25% 10% / 0.08), 0 8px 10px -6px hsl(220 25% 10% / 0.04);
+    --header-gradient: linear-gradient(135deg, hsl(170 50% 25%), hsl(170 45% 18%));
+    --shadow-card: 0 1px 3px 0 hsl(220 20% 12% / 0.06), 0 1px 2px -1px hsl(220 20% 12% / 0.06);
+    --shadow-elevated: 0 10px 25px -5px hsl(220 20% 12% / 0.08), 0 8px 10px -6px hsl(220 20% 12% / 0.04);
   }
 
   .dark {

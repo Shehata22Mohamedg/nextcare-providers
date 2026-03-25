@@ -94,11 +94,7 @@ export default function Index() {
 
         {/* Main content */}
         <div className="flex-1 min-w-0 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {filtered.length} {t("providers")}
-            </p>
-
+          <div className="flex items-center justify-end">
             {/* Mobile filter button */}
             <Button
               variant="outline"
