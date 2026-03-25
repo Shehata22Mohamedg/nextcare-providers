@@ -20,27 +20,47 @@ export interface ProviderRaw {
   status: string;
 }
 
-// Lazy-load xlsx to avoid blocking initial render (~800KB)
-let xlsxModule: typeof import("xlsx") | null = null;
+// Lazy-load exceljs
+let excelModule: typeof import("exceljs") | null = null;
 
-async function getXLSX() {
-  if (!xlsxModule) {
-    xlsxModule = await import("xlsx");
+async function getExcelJS() {
+  if (!excelModule) {
+    excelModule = await import("exceljs");
   }
-  return xlsxModule;
+  return excelModule;
 }
 
 export async function loadProviders(): Promise<ProviderRaw[]> {
-  // Start both fetches in parallel
-  const [response, XLSX] = await Promise.all([
+  const [response, ExcelJS] = await Promise.all([
     fetch("/data/providers.xlsx"),
-    getXLSX(),
+    getExcelJS(),
   ]);
-  
+
   const buffer = await response.arrayBuffer();
-  const workbook = XLSX.read(buffer, { type: "array" });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<any>(sheet);
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.worksheets[0];
+
+  const rows: any[] = [];
+
+  // أول row = headers
+  let headers: string[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    const values = row.values as any[];
+
+    if (rowNumber === 1) {
+      headers = values.map((v) => String(v || "").trim());
+    } else {
+      const obj: any = {};
+      headers.forEach((header, i) => {
+        obj[header] = values[i];
+      });
+      rows.push(obj);
+    }
+  });
 
   const s = (v: unknown): string => (v == null ? "" : String(v).trim());
 
