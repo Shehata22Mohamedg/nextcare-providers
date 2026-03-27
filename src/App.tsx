@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,26 @@ import NotFound from "./pages/NotFound.tsx";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
+const GA_MEASUREMENT_ID = "G-SSN9LNR9D1";
+
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+    if (!gtag) return;
+
+    const pagePath = `${location.pathname}${location.search}${location.hash}`;
+    gtag("event", "page_view", {
+      page_path: pagePath,
+      page_location: window.location.href,
+      page_title: document.title,
+      send_to: GA_MEASUREMENT_ID,
+    });
+  }, [location]);
+
+  return null;
+}
 
 function AppInner() {
   const { dir } = useLanguage();
@@ -22,6 +43,7 @@ function AppInner() {
           basename="/nextcare-providers"
           future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
+          <AnalyticsTracker />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />
