@@ -31,8 +31,10 @@ async function getExcelJS() {
 }
 
 export async function loadProviders(): Promise<ProviderRaw[]> {
+  const providersFileUrl = `${import.meta.env.BASE_URL}data/providers.xlsx`;
+
   const [response, ExcelJS] = await Promise.all([
-    fetch("/data/providers.xlsx"),
+    fetch(providersFileUrl),
     getExcelJS(),
   ]);
 
