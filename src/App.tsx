@@ -17,13 +17,17 @@ function AppInner() {
     <div dir={dir}>
       <TooltipProvider>
         <Toaster />
-        <Sonner />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Sonner />        
+        <BrowserRouter
+          basename="/nextcare-providers"
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+
       </TooltipProvider>
     </div>
   );
