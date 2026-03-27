@@ -117,6 +117,10 @@ export default function Index() {
           {/* Mobile: card layout with pagination, Desktop: table */}
           {isMobile ? (
             <div className="space-y-3">
+              <div className="px-1 text-sm text-muted-foreground">
+                {filtered.length} {t("providers")}
+              </div>
+
               {filtered.length === 0 ? (
                 <p className="text-center py-12 text-muted-foreground">
                   {t("noResults")}
