@@ -1,5 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ProviderRaw } from "@/lib/excelParser";
+import { normalizeArabic } from "@/lib/utils";
 import { useMemo, useState, useEffect } from "react";
 import { Filter, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -117,16 +118,19 @@ function useCascadingOptions(providers: ProviderRaw[], filters: Filters, languag
     const en = language === "en";
 
     const getVal = (p: ProviderRaw, key: keyof Filters): string => {
-      switch (key) {
-        case "governate": return en ? p.governateEN : p.governateAR;
-        case "city": return en ? p.cityEN : p.cityAR;
-        case "specialty": return en ? p.specialtyEN : p.specialtyAR;
-        case "services": return en ? p.servicesEN : p.servicesAR;
-        case "providerType": return en ? p.providerTypeEN : p.providerTypeAR;
-        case "networkType": return p.networkType;
-        case "status": return p.status;
-        case "mainBranch": return p.mainBranch;
-      }
+      const raw = (() => {
+        switch (key) {
+          case "governate": return en ? p.governateEN : p.governateAR;
+          case "city": return en ? p.cityEN : p.cityAR;
+          case "specialty": return en ? p.specialtyEN : p.specialtyAR;
+          case "services": return en ? p.servicesEN : p.servicesAR;
+          case "providerType": return en ? p.providerTypeEN : p.providerTypeAR;
+          case "networkType": return p.networkType;
+          case "status": return p.status;
+          case "mainBranch": return p.mainBranch;
+        }
+      })();
+      return normalizeArabic(raw);
     };
 
     const filterKeys: (keyof Filters)[] = [

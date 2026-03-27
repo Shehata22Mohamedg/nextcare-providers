@@ -13,6 +13,7 @@ import ProviderCard from "@/components/ProviderCard";
 import MobileFilterDrawer from "@/components/MobileFilterDrawer";
 import AppFooter from "@/components/AppFooter";
 import { ProviderRaw } from "@/lib/excelParser";
+import { normalizeArabic } from "@/lib/utils";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -46,7 +47,8 @@ export default function Index() {
         if (q && !(en ? entry.textEN : entry.textAR).includes(q)) return false;
 
         const p = entry.provider;
-        const check = (sel: string[], val: string) => sel.length === 0 || sel.includes(val);
+        const check = (sel: string[], val: string) =>
+          sel.length === 0 || sel.includes(normalizeArabic(val));
         if (!check(filters.governate, en ? p.governateEN : p.governateAR)) return false;
         if (!check(filters.city, en ? p.cityEN : p.cityAR)) return false;
         if (!check(filters.specialty, en ? p.specialtyEN : p.specialtyAR)) return false;
